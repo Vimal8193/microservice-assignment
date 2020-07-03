@@ -1,0 +1,66 @@
+version: '3'
+services:
+  docker-mysql:
+    restart: always
+    container_name: docker-mysql
+    image: mysql
+    environment:
+      MYSQL_DATABASE: crudapi
+      MYSQL_ROOT_PASSWORD: root
+      MYSQL_ROOT_HOST: '%'
+    ports:
+      - "6033:3306"
+    expose:
+      - "6033"
+      
+  eureka-naming-server:
+    restart: on-failure
+    container_name: eureka-naming-server
+    image: vimal8193/eureka-naming-server:1.0
+    expose:
+      - "8761"
+    ports:
+      - 8761:8761
+      
+  zuul-api-server:
+    restart: on-failure
+    container_name: zuul-api-server
+    image: vimal8193/zuul-api-server:1.0
+    expose:
+      - "8765"
+    ports:
+      - 8765:8765
+    depends_on:
+      - eureka-naming-server
+      
+  user-app:
+    restart: on-failure
+    image: vimal8193/user-app-nodb:1.0
+    expose:
+      - "8082"
+    ports:
+      - 8082:8082
+    depends_on:
+      - eureka-naming-server
+      - docker-mysql
+      
+  orders-app:
+    restart: on-failure
+    image: vimal8193/orders-app:1.0
+    expose:
+      - "8081"
+    ports:
+      - 8081:8081
+    depends_on:
+      - eureka-naming-server
+      
+  aggregator-app:
+    restart: on-failure
+    image: vimal8193/aggregator-app:1.0
+    expose:
+      - "8888"
+    ports:
+      - 8888:8888
+    depends_on:
+      - eureka-naming-server
+      - zuul-api-server

@@ -1,0 +1,34 @@
+version: '3'
+services:
+  docker-mysql:
+    restart: always
+    container_name: docker-mysql
+    image: mysql
+    environment:
+      MYSQL_DATABASE: crudapi
+      MYSQL_ROOT_PASSWORD: root
+      MYSQL_ROOT_HOST: '%'
+    ports:
+      - "6033:3306"
+    expose:
+      - "6033"
+      
+  eureka-naming-server:
+    restart: on-failure
+    container_name: eureka-naming-server
+    image: vimal8193/eureka-naming-server:1.0
+    expose:
+      - "8761"
+    ports:
+      - 8761:8761
+      
+  user-app:
+    restart: on-failure
+    image: vimal8193/user-app:1.0
+    expose:
+      - "8082"
+    ports:
+      - 8082:8082
+    depends_on:
+      - eureka-naming-server
+      - docker-mysql
